@@ -6,7 +6,7 @@ import torch.utils.model_zoo as model_zoo
 import torch.nn.functional as F
 import torch
 import numpy as np
-import global_pooling
+import global_pool as gp
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -96,7 +96,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=200, gap="GAP"):
+    def __init__(self, block, layers, num_classes=200, pool_name="GAP"):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -110,19 +110,21 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.inplanes = 1024 
 
-        self.model_param = {
-                "GAP": (nn.AdaptiveAvgPool2d, (1, )), 
-                "GMP": (nn.AdaptiveMaxPool2d, (1, )),
-                "STP": (pooling.GlobalStochasticPool2d, (1, )),
-                "LPP": (pooling.GlobalLpPool2d, (1, 2, )),
-                "SMP": (pooling.GlobalSoftPool2d, ()),
-                "KMP": (pooling.GlobalKMaxPool2d, (1, 2, )),
-                "MXP": (pooling.GlobalMixedPool2d, (0, .5)), 
-                "GTP": (pooling.GlobalGatedPool2d, ())
+        self.pool_name = pool_name
+        self.pool_func = {
+                "GAP": nn.AdaptiveAvgPool2d(1), 
+                "GMP": nn.AdaptiveMaxPool2d(1),
+                "STP": gp.GlobalStochasticPool2d(),
+                "LPP": gp.GlobalLpNormPool2d(),
+                "SMP": gp.GlobalSoftPool2d(),
+                "KMP": gp.GlobalKMaxPool2d(),
+                "MXP": gp.GlobalMixedPool2d(), 
+                "GTP": gp.GlobalGatedPool2d(),
+                "LAEP":gp.GlobalLogAvgExpPool2d(),
                 }
 
-        if pool_name in self.model_param:
-            self.pool = self.name2pool[pool_name](self.name2para[pool_name])
+        if pool_name in self.pool_func:
+            self.pool = self.pool_func[pool_name]
         else:
             raise Exception("Wrong pooling type")
 

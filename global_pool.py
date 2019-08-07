@@ -38,7 +38,7 @@ class GlobalStochasticPool2d(torch.nn.Module):
         y = x.mul(prob.view(b,c,h,w)).sum(-1).sum(-1)
         return y
 
-class GlobalLpNorm2d(torch.nn.Module):
+class GlobalLpNormPool2d(torch.nn.Module):
     def __init__(self, p = 2):
         super().__init__()
         self.p = p
@@ -146,8 +146,10 @@ class GlobalGatedPool2d(torch.nn.Module):
         if self.weight is None:
             # Parameter is a special case of Tensor and
             # are good for paramter list using parameter()
-            self.weight = torch.nn.Parameter(
-                    torch.zeros((h*w,1), requires_grad=True))
+            weight = torch.zeros((h*w,1), requires_grad=True)
+            if x.is_cuda:
+                weight = weight.cuda()
+            self.weight = torch.nn.Parameter(weight)
             # initialization
             stdv = 1. / math.sqrt(self.weight.size(0))
             self.weight.data.uniform_(-stdv, stdv)
@@ -159,6 +161,19 @@ class GlobalGatedPool2d(torch.nn.Module):
         y = alpha * xmax + (1 - alpha) * xavg
         y = y.view(b, c)
         return y
+
+class GlobalDetailPreservePool2d(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+# don't forget blur max, average, etc.
+class GlobalBlurMaxPool2d(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+class BilinearPool2d(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
 
 def test():
     inputs = [torch.rand(2,3,4,5), torch.zeros(2,3,4,5)]
