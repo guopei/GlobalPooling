@@ -127,6 +127,7 @@ class ResNet(nn.Module):
             self.pool = self.pool_func[pool_name]
         else:
             raise Exception("Wrong pooling type")
+        self.final_bn = nn.BatchNorm1d(2048)
 
         self.linear = nn.Linear(512*block.expansion, num_classes, bias=False)
 
@@ -175,6 +176,7 @@ class ResNet(nn.Module):
         
         y = self.pool(x)
         y = y.view(b, -1)
+        y = self.final_bn(y)
         z = self.linear(y)
 
         return z, (x,y)

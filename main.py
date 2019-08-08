@@ -4,10 +4,6 @@ import shutil
 import time
 import random
 
-import sys
-sys.path.insert(1, '../vision/')
-sys.path.append('../utils/')
-
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -16,8 +12,6 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models as models
-from torchvision.losses import FocalLoss
 
 from datetime import datetime
 from utils import create_if_not_exists as cine
@@ -37,7 +31,7 @@ parser.add_argument('-b', '--batch-size', default=16, type=int,
         metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
         help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=0, type=float,
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
         metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--print-freq', '-p', default=300, type=int,
         metavar='N', help='print frequency (default: 10)')
@@ -91,7 +85,7 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), 0,
             momentum=args.momentum,
             weight_decay=args.weight_decay)
-    #optimizer = torch.optim.Adam(model.parameters(), lr=0.05)
+    #optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -212,11 +206,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
         end = time.time()
 
         if i > 0 and i % args.print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                    'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                    'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                    'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                    'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+            print('Epoch: [{0}][{1}/{2}] '
+                    'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) '
+                    'Data {data_time.val:.3f} ({data_time.avg:.3f}) '
+                    'Loss {loss.val:.4f} ({loss.avg:.4f}) '
+                    'Prec@1 {top1.val:.3f} ({top1.avg:.3f}) '
                     'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                         epoch, i, len(train_loader), batch_time=batch_time,
                         data_time=data_time, loss=losses, top1=top1, top5=top5))
