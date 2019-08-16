@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python main.py /mv_users/peiguo/dataset/cub-fewshot/full/ --nclasses 200 --pool_name GMP --pretrained  --print-freq 100 --lr 0.001 30 0.0001 20 #--resume checkpoints/2019_03_21_21_16_09_checkpoint.pth.tar -e
+CUDA_VISIBLE_DEVICES=0 python main.py /mv_users/peiguo/dataset/cub-fewshot/full/ --nclasses 200 --pool_name  KMP --pretrained  --print-freq 100 --lr 0.001 30 0.005 20 0.0025 20 0.0001 20

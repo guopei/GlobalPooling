@@ -115,12 +115,12 @@ class ResNet(nn.Module):
                 "GAP": nn.AdaptiveAvgPool2d(1), 
                 "GMP": nn.AdaptiveMaxPool2d(1),
                 "STP": gp.GlobalStochasticPool2d(),
-                "LPP": gp.GlobalLpNormPool2d(),
-                "SMP": gp.GlobalSoftPool2d(),
-                "KMP": gp.GlobalKMaxPool2d(),
-                "MXP": gp.GlobalMixedPool2d(), 
+                "LPP": gp.GlobalLpNormPool2d(2),
+                "SMP": gp.GlobalSoftPool2d(1),
+                "KMP": gp.GlobalKMaxPool2d(2),
+                "MXP": gp.GlobalMixedPool2d(.5), 
                 "GTP": gp.GlobalGatedPool2d(),
-                "LAEP":gp.GlobalLogAvgExpPool2d(),
+                "LAEP":gp.GlobalLogAvgExpPool2d(1),
                 }
 
         if pool_name in self.pool_func:

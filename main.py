@@ -57,7 +57,6 @@ time_string = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
 cine('logs')
 Tee('logs/cmd_log_{}'.format(time_string), 'w')
-features = []
 
 def main():
     global args, best_prec1
@@ -144,7 +143,6 @@ def main():
             print("wrong train_val flag")
             return
 
-        pickle.dump(features, open('checkpoints/features_{}.pkl'.format(time_string), 'wb'))
         return
 
     for epoch in range(args.start_epoch, args.epochs):
@@ -177,7 +175,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
 
     end = time.time()
-    for i, (inputs, target, paths) in enumerate(train_loader):
+    for i, (inputs, target) in enumerate(train_loader):
 
         # measure data loading time
         data_time.update(time.time() - end)
@@ -231,7 +229,7 @@ def validate(val_loader, model, criterion, epoch):
 
     end = time.time()
     with torch.no_grad():
-        for i, (inputs, target, paths) in enumerate(val_loader):
+        for i, (inputs, target) in enumerate(val_loader):
             target = target.cuda()
             inputs_var = torch.autograd.Variable(inputs)
             target_var = torch.autograd.Variable(target)
@@ -258,18 +256,6 @@ def validate(val_loader, model, criterion, epoch):
                         'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                             i, len(val_loader), batch_time=batch_time, loss=losses,
                             top1=top1, top5=top5))
-
-        if epoch == args.epochs-1 or args.evaluate:
-            batch_size = target.size(0)
-            for idx in range(batch_size):
-                feat = {}
-                feat['name'] = paths[idx]
-                feat['gt'] = target[idx]
-                feat['ft'] = output[idx].cpu().numpy()
-                feat['penu'] = ft_out[0][idx].cpu().numpy()
-                feat['pool'] = ft_out[1][idx].cpu().numpy()
-                feat['image'] = inverse_normalization(inputs[idx].numpy())
-                features.append(feat)
 
     print(' * Val Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.3f}'
             .format(top1=top1, top5=top5, loss=losses))
