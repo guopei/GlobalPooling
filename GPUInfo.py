@@ -1,7 +1,9 @@
 """
 Parse nvidia-smi xml output to obtain gpu usage.
+Work with batch.py as task scheduler.
 Pei Guo
 BYU
+Aug, 2019
 """
 
 import subprocess as sp
