@@ -33,8 +33,8 @@ while len(tasks) > 0:
         del tasks[0]
         time.sleep(10)
 
-    print("All GPUs are utilized, check back in 1 mins")
-    time.sleep(60)
+    print("All GPUs are utilized, check back in 10 mins")
+    time.sleep(600)
 
 print("*"*30)
 print('All tasks are finished')

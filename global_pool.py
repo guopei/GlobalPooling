@@ -68,7 +68,7 @@ class GlobalLogAvgExpPool2d(torch.nn.Module):
         b, c, h, w = x.size()
         x = x.view(-1, h*w)
         # equation from "a theoretical analysis of feature pooling ..."
-        # pytorch's implementation is umerically-stable I guess, see:
+        # pytorch's implementation is numerically-stable I guess, see:
         # https://www.xarg.org/2016/06/the-log-sum-exp-trick-in-machine-learning/ 
         # for reference.
         y = 1 / self.beta * (x.logsumexp(-1).view(b,c) - math.log(h*w))

@@ -75,7 +75,7 @@ def main():
     torch.cuda.manual_seed_all(args.manualSeed)
     torch.manual_seed(args.manualSeed)
 
-    model = resnet152(pretrained=args.pretrained, num_classes=args.nclasses, pool_name=args.pool_name)
+    model = resnet50(pretrained=args.pretrained, num_classes=args.nclasses, pool_name=args.pool_name)
 
     print(model)
 
