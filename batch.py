@@ -4,7 +4,7 @@ import random
 from subprocess import Popen, check_call
 from GPUInfo import GPUInfo
 
-gpu_usable = [0,1,2,3]
+gpu_usable = [0,1,2]
 dataset = "/mv_users/peiguo/dataset/scars/"
 nclasses = 196
 poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
@@ -14,10 +14,8 @@ task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --l
 for pool in poolings:
    tasks.append(task_template.format(dataset, nclasses, pool)) 
 
-info = GPUInfo
-
 while len(tasks) > 0:
-    gpu_info = info.info()
+    gpu_info = GPUInfo.info()
     for gpu_id in gpu_usable:
         util = gpu_info[gpu_id]["gpu_util"]
         mem_used = gpu_info[gpu_id]["mem_used"]
@@ -26,7 +24,7 @@ while len(tasks) > 0:
         print("*"*30)
         if len(tasks) == 0:
             break
-        if util > 0 or mem_used > 0:
+        if mem_used > 1000:
             continue
         cmdstr = "CUDA_VISIBLE_DEVICES={} ".format(gpu_id) + tasks[0]
         Popen(cmdstr, shell=True)

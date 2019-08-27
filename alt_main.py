@@ -12,6 +12,8 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms.transforms as transforms
 import torchvision.datasets as datasets
+from focal import FocalLoss
+import torch.nn.functional as F
 
 from datetime import datetime
 from utils import create_if_not_exists as cine
@@ -80,7 +82,8 @@ def main():
     print(model)
 
     # define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = (nn.CrossEntropyLoss().cuda(), EntropyLoss().cuda())
+    
     optimizer = torch.optim.SGD(model.parameters(), 0,
             momentum=args.momentum,
             weight_decay=args.weight_decay)
@@ -113,7 +116,7 @@ def main():
             traindir,
             transforms.Compose([
                 transforms.Resize(512),
-                transforms.RandomResizedCrop(448),
+                transforms.RandomResizedCrop(448, scale=(0.1,1)),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
@@ -168,8 +171,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
+    loss0s = AverageMeter()
+    loss1s = AverageMeter()
     top1 = AverageMeter()
-    top5 = AverageMeter()
 
     # switch to train mode
     model.train()
@@ -186,13 +190,16 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output, _= model(inputs_var.cuda(), epoch)
-        loss = criterion(output.cuda(), target_var.cuda())
+        loss0 = criterion[0](output.cuda(), target_var.cuda())
+        loss1 = criterion[1](output.cuda())
+        loss  = loss0 - loss1
 
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+        prec1, _ = accuracy(output.data, target, topk=(1, 5))
         losses.update(loss.item(), inputs.size(0))
+        loss0s.update(loss0.item(), inputs.size(0))
+        loss1s.update(loss1.item(), inputs.size(0))
         top1.update(prec1[0], inputs.size(0))
-        top5.update(prec5[0], inputs.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -208,21 +215,23 @@ def train(train_loader, model, criterion, optimizer, epoch):
                     'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) '
                     'Data {data_time.val:.3f} ({data_time.avg:.3f}) '
                     'Loss {loss.val:.4f} ({loss.avg:.4f}) '
-                    'Prec@1 {top1.val:.3f} ({top1.avg:.3f}) '
-                    'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+                    'Cls Loss {loss0.val:.4f} ({loss0.avg:.4f}) '
+                    'Etp Loss {loss1.val:.4f} ({loss1.avg:.4f}) '
+                    'Prec@1 {top1.val:.3f} ({top1.avg:.3f}) '.format(
                         epoch, i, len(train_loader), batch_time=batch_time,
-                        data_time=data_time, loss=losses, top1=top1, top5=top5))
+                        data_time=data_time, loss=losses, top1=top1, loss0=loss0s, loss1=loss1s))
 
 
-    print(' * Train Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.3f}'
-            .format(top1=top1, top5=top5, loss=losses))
+    print(' * Train Prec@1 {top1.avg:.3f} Loss {loss.avg:.3f}'
+            .format(top1=top1, loss=losses))
 
 
 def validate(val_loader, model, criterion, epoch):
     batch_time = AverageMeter()
     losses = AverageMeter()
+    loss0s = AverageMeter()
+    loss1s = AverageMeter()
     top1 = AverageMeter()
-    top5 = AverageMeter()
 
     # switch to evaluate mode
     model.eval()
@@ -236,13 +245,16 @@ def validate(val_loader, model, criterion, epoch):
 
             # compute output
             output, ft_out= model(inputs_var.cuda(), epoch)
-            loss = criterion(output.cuda(), target_var.cuda())
-
+            loss0 = criterion[0](output.cuda(), target_var.cuda())
+            loss1 = criterion[1](output.cuda())
+            loss  = loss0 - loss1
+            
             # measure accuracy and record loss
-            prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+            prec1, _ = accuracy(output.data, target, topk=(1, 5))
             losses.update(loss.item(), inputs.size(0))
+            loss0s.update(loss0.item(), inputs.size(0))
+            loss1s.update(loss1.item(), inputs.size(0))
             top1.update(prec1[0], inputs.size(0))
-            top5.update(prec5[0], inputs.size(0))
 
             # measure elapsed time
             batch_time.update(time.time() - end)
@@ -252,13 +264,14 @@ def validate(val_loader, model, criterion, epoch):
                 print('Test: [{0}/{1}]\t'
                         'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                         'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                        'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                        'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+                        'Cls Loss {loss0.val:.4f} ({loss0.avg:.4f}) '
+                        'Etp Loss {loss1.val:.4f} ({loss1.avg:.4f}) '
+                        'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'.format(
                             i, len(val_loader), batch_time=batch_time, loss=losses,
-                            top1=top1, top5=top5))
+                            top1=top1, loss0=loss0s, loss1=loss1s))
 
-    print(' * Val Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.3f}'
-            .format(top1=top1, top5=top5, loss=losses))
+    print(' * Val Prec@1 {top1.avg:.3f} Loss {loss.avg:.3f}'
+            .format(top1=top1, loss=losses))
 
     return top1.avg
 
@@ -323,6 +336,14 @@ def inverse_normalization(img,
         i += m
     return img
 
+class EntropyLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        b = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
+        b = -1.0 * b.mean()
+        return b
 
 if __name__ == '__main__':
     main()
