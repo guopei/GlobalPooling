@@ -7,12 +7,15 @@ from GPUInfo import GPUInfo
 gpu_usable = [0,1,2]
 dataset = "/mv_users/peiguo/dataset/cub-fewshot/full/"
 nclasses = 200
-poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
+#poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
+poolings = ["KMP"]
+params = np.arange(1,196)
 
 tasks = []
-task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --lr 0.001 30 0.0001 20"
+task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --param {} --lr 0.001 30 0.0001 20"
 for pool in poolings:
-   tasks.append(task_template.format(dataset, nclasses, pool)) 
+    for param in params:
+        tasks.append(task_template.format(dataset, nclasses, pool, param)) 
 
 while len(tasks) > 0:
     gpu_info = GPUInfo.info()

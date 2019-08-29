@@ -104,7 +104,7 @@ class GlobalSoftPool2d(torch.nn.Module):
 class GlobalKMaxPool2d(torch.nn.Module):
     def __init__(self, k = 1):
         super().__init__()
-        self.k = k
+        self.k = int(k)
         if self.k < 1:
             warning.warn("k should be greater than or equal to 1," \
                     "automatically setting it to 1 to avoid errors.")

@@ -49,6 +49,8 @@ parser.add_argument('--manualSeed', default='0', type=int,
         help='manual seed')
 parser.add_argument('--pool_name', default='GAP', type=str,
         help='pool name: GAP, GMP, KMP, LPP, SMP, MXP, GTP, STP, LAEP, STP')
+parser.add_argument('--param', default=1, type=float,
+        help='pool param')
 parser.add_argument('--lr', default='0.001, 30', nargs='+', type=float,
         help='learning rate schedule, lr1, epoch1, lr2, epoch2,...')
 
@@ -75,7 +77,8 @@ def main():
     torch.cuda.manual_seed_all(args.manualSeed)
     torch.manual_seed(args.manualSeed)
 
-    model = resnet50(pretrained=args.pretrained, num_classes=args.nclasses, pool_name=args.pool_name)
+    model = resnet50(pretrained=args.pretrained, num_classes=args.nclasses, 
+            pool_name=args.pool_name, param=args.param)
 
     print(model)
 
