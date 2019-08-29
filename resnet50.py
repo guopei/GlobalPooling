@@ -124,7 +124,7 @@ class ResNet(nn.Module):
                 }
 
         if pool_name in self.pool_func:
-            self.pool = self.pool_func(param)[pool_name]
+            self.pool = self.pool_func[pool_name](param)
         else:
             raise Exception("Wrong pooling type")
         self.final_bn = nn.BatchNorm1d(2048)

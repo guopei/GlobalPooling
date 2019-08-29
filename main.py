@@ -165,7 +165,7 @@ def main():
             'optimizer' : optimizer.state_dict(),
             })
 
-    print(args.data, args.pool_name, prec1)
+    print(args.data, args.pool_name, args.param, prec1)
 
 def train(train_loader, model, criterion, optimizer, epoch):
     batch_time = AverageMeter()

@@ -1,15 +1,16 @@
 import os
 import time
 import random
-from subprocess import Popen, check_call
+import numpy as np
 from GPUInfo import GPUInfo
+from subprocess import Popen, check_call
 
-gpu_usable = [0,1,2]
+gpu_usable = [0,1,4,5]
 dataset = "/mv_users/peiguo/dataset/cub-fewshot/full/"
 nclasses = 200
 #poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
 poolings = ["KMP"]
-params = np.arange(1,196)
+params = np.arange(1,197)
 
 tasks = []
 task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --param {} --lr 0.001 30 0.0001 20"
