@@ -5,8 +5,8 @@ from subprocess import Popen, check_call
 from GPUInfo import GPUInfo
 
 gpu_usable = [0,1,2]
-dataset = "/mv_users/peiguo/dataset/scars/"
-nclasses = 196
+dataset = "/mv_users/peiguo/dataset/cub-fewshot/full/"
+nclasses = 200
 poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
 
 tasks = []

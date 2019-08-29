@@ -96,7 +96,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=200, pool_name="GAP"):
+    def __init__(self, block, layers, num_classes=200, pool_name="GAP", param=-1):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -112,19 +112,19 @@ class ResNet(nn.Module):
 
         self.pool_name = pool_name
         self.pool_func = {
-                "GAP": nn.AdaptiveAvgPool2d(1), 
-                "GMP": nn.AdaptiveMaxPool2d(1),
-                "STP": gp.GlobalStochasticPool2d(),
-                "LPP": gp.GlobalLpNormPool2d(2),
-                "SMP": gp.GlobalSoftPool2d(1),
-                "KMP": gp.GlobalKMaxPool2d(2),
-                "MXP": gp.GlobalMixedPool2d(.5), 
-                "GTP": gp.GlobalGatedPool2d(),
-                "LAEP":gp.GlobalLogAvgExpPool2d(1),
+                "GAP": nn.AdaptiveAvgPool2d, 
+                "GMP": nn.AdaptiveMaxPool2d,
+                "STP": gp.GlobalStochasticPool2d,
+                "LPP": gp.GlobalLpNormPool2d,
+                "SMP": gp.GlobalSoftPool2d,
+                "KMP": gp.GlobalKMaxPool2d,
+                "MXP": gp.GlobalMixedPool2d, 
+                "GTP": gp.GlobalGatedPool2d,
+                "LAEP":gp.GlobalLogAvgExpPool2d,
                 }
 
         if pool_name in self.pool_func:
-            self.pool = self.pool_func[pool_name]
+            self.pool = self.pool_func(param)[pool_name]
         else:
             raise Exception("Wrong pooling type")
         self.final_bn = nn.BatchNorm1d(2048)

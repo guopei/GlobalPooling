@@ -53,6 +53,9 @@ class GlobalLpNormPool2d(torch.nn.Module):
         y = x.pow(self.p).mean(-1).mean(-1).pow(1 / self.p)
         return y
 
+    def extra_repr(self):
+        return 'p={}'.format(self.p)
+
 class GlobalLogAvgExpPool2d(torch.nn.Module):
     # this is essentially log-sum-exp function, 
     #
@@ -74,6 +77,9 @@ class GlobalLogAvgExpPool2d(torch.nn.Module):
         y = 1 / self.beta * (x.logsumexp(-1).view(b,c) - math.log(h*w))
         return y
 
+    def extra_repr(self):
+        return 'beta={}'.format(self.beta)
+
 class GlobalSoftPool2d(torch.nn.Module):
     def __init__(self, beta = 1):
         super().__init__()
@@ -91,6 +97,9 @@ class GlobalSoftPool2d(torch.nn.Module):
         
         y = x.mul(prob.view(b,c,h,w)).sum(-1).sum(-1)
         return y
+
+    def extra_repr(self):
+        return 'beta={}'.format(self.beta)
 
 class GlobalKMaxPool2d(torch.nn.Module):
     def __init__(self, k = 1):
@@ -116,6 +125,8 @@ class GlobalKMaxPool2d(torch.nn.Module):
         weight.scatter_(1, indices, 1)
         y = x.mul(weight.view(b,c,h,w)).sum(-1).sum(-1)
         return y
+    def extra_repr(self):
+        return 'k={}'.format(self.k)
 
 class GlobalMixedPool2d(torch.nn.Module):
     def __init__(self, alpha=0):
@@ -133,6 +144,9 @@ class GlobalMixedPool2d(torch.nn.Module):
         y = self.alpha * xmax + (1 - self.alpha) * xavg
         y = y.view(b, c)
         return y
+    
+    def extra_repr(self):
+        return 'alpha={}'.format(self.alpha)
 
 class GlobalGatedPool2d(torch.nn.Module):
     def __init__(self):
