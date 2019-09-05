@@ -152,12 +152,12 @@ def main():
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch)
+        train_prec1 = train(train_loader, model, criterion, optimizer, epoch)
 
         # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion, epoch)
+        val_prec1 = validate(val_loader, model, criterion, epoch)
 
-        best_prec1 = max(prec1, best_prec1)
+        best_prec1 = max(val_prec1, best_prec1)
         save_checkpoint({
             'epoch': epoch + 1,
             'state_dict': model.state_dict(),
@@ -165,7 +165,7 @@ def main():
             'optimizer' : optimizer.state_dict(),
             })
 
-    print(args.data, args.pool_name, args.param, prec1)
+    print(args.data, args.pool_name, args.param, train_prec1, val_prec1)
 
 def train(train_loader, model, criterion, optimizer, epoch):
     batch_time = AverageMeter()
@@ -219,6 +219,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     print(' * Train Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.3f}'
             .format(top1=top1, top5=top5, loss=losses))
+    return top1.avg
 
 
 def validate(val_loader, model, criterion, epoch):
