@@ -113,7 +113,7 @@ class GlobalKMaxPool2d(torch.nn.Module):
     def forward(self, x):
         data = x.detach()
         b, c, h, w = data.size()
-        if self.k >= h * w:
+        if self.k > h * w:
             warning.warn("k should be less than {} x {} = {}," \
                     "automatically setting it to {} to avoid errors.".format(
                         h, w, h*w, h*w-1))
