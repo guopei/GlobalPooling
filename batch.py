@@ -9,8 +9,8 @@ gpu_usable = [0,1,4,5]
 dataset = "/mv_users/peiguo/dataset/cub-fewshot/full/"
 nclasses = 200
 #poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
-poolings = ["KMP"]
-params = np.arange(1,197)
+poolings = ["MXP"]
+params = np.arange(0,1.01,.05)
 
 tasks = []
 task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --param {} --lr 0.001 30 0.0001 20"
