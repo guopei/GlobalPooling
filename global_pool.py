@@ -41,6 +41,7 @@ class GlobalStochasticPool2d(torch.nn.Module):
 class GlobalLpNormPool2d(torch.nn.Module):
     def __init__(self, p = 2):
         super().__init__()
+        self.eps = sys.float_info.epsilon
         self.p = p
         if self.p < 1:
             warning.warn("norm should be greater than or equal to 1," \
@@ -50,7 +51,11 @@ class GlobalLpNormPool2d(torch.nn.Module):
     def forward(self, x):
         b, c, h, w = x.size()
         # equation from "a theoretical analysis of feature pooling ..."
-        y = x.pow(self.p).mean(-1).mean(-1).pow(1 / self.p)
+        # x is always > 0, so adding self.eps should be enough
+        # to avoid divide by zero.
+        xmax = x.view(b,c,-1).max(-1)[0] + self.eps
+        # for numerical stability
+        y = xmax * ((x/xmax[...,None,None]).pow(self.p).mean(-1).mean(-1).pow(1/self.p))
         return y
 
     def extra_repr(self):
