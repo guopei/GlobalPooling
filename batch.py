@@ -8,15 +8,16 @@ from subprocess import Popen, check_call
 gpu_usable = [0,1,4,5]
 dataset = "/mv_users/peiguo/dataset/cub-fewshot/full/"
 nclasses = 200
-#poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
-poolings = ["LPP"]
-params = np.insert(np.arange(1,11)*10, 0, 1)
+poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
+#poolings = ["MXP"]
+#params = np.insert(np.arange(1,11)*10, 0, 1)
+#params = np.arange(0,1.01,0.05)
 
 tasks = []
-task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --param {} --lr 0.001 30 0.0001 20"
+task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --lr 0.001 30 0.0001 20"
 for pool in poolings:
-    for param in params:
-        tasks.append(task_template.format(dataset, nclasses, pool, param)) 
+    #for param in params:
+    tasks.append(task_template.format(dataset, nclasses, pool)) 
 
 while len(tasks) > 0:
     gpu_info = GPUInfo.info()

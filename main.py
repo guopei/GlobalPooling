@@ -18,6 +18,7 @@ from utils import create_if_not_exists as cine
 from utils import Tee
 import pickle
 from resnet50 import *
+from inception import *
 import numpy as np
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -77,7 +78,9 @@ def main():
     torch.cuda.manual_seed_all(args.manualSeed)
     torch.manual_seed(args.manualSeed)
 
-    model = resnet50(pretrained=args.pretrained, num_classes=args.nclasses, 
+    #model = resnet50(pretrained=args.pretrained, num_classes=args.nclasses, 
+    #        pool_name=args.pool_name, param=args.param)
+    model = inception_v3(pretrained=args.pretrained, num_classes=args.nclasses, 
             pool_name=args.pool_name, param=args.param)
 
     print(model)
@@ -188,7 +191,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         target_var = torch.autograd.Variable(target)
 
         # compute output
-        output, _= model(inputs_var.cuda(), epoch)
+        output = model(inputs_var.cuda())
         loss = criterion(output.cuda(), target_var.cuda())
 
         # measure accuracy and record loss
@@ -222,7 +225,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     return top1.avg
 
 
-def validate(val_loader, model, criterion, epoch):
+def validate(val_loader, model, criterion):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -239,7 +242,7 @@ def validate(val_loader, model, criterion, epoch):
             target_var = torch.autograd.Variable(target)
 
             # compute output
-            output, ft_out= model(inputs_var.cuda(), epoch)
+            output = model(inputs_var.cuda())
             loss = criterion(output.cuda(), target_var.cuda())
 
             # measure accuracy and record loss

@@ -179,7 +179,7 @@ class ResNet(nn.Module):
         y = self.final_bn(y)
         z = self.linear(y)
 
-        return z, (x,y)
+        return z
         
 
 def resnet50(pretrained=False, **kwargs):
