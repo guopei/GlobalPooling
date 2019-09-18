@@ -87,10 +87,10 @@ def main():
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
-    optimizer = torch.optim.SGD(model.parameters(), 0,
-            momentum=args.momentum,
-            weight_decay=args.weight_decay)
-    #optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    #optimizer = torch.optim.SGD(model.parameters(), 0,
+    #        momentum=args.momentum,
+    #        weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -118,7 +118,7 @@ def main():
     train_dataset = datasets.ImageFolder(
             traindir,
             transforms.Compose([
-                transforms.Resize(512),
+                #transforms.Resize(512),
                 transforms.RandomResizedCrop(448),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
@@ -158,7 +158,7 @@ def main():
         train_prec1 = train(train_loader, model, criterion, optimizer, epoch)
 
         # evaluate on validation set
-        val_prec1 = validate(val_loader, model, criterion, epoch)
+        val_prec1 = validate(val_loader, model, criterion)
 
         best_prec1 = max(val_prec1, best_prec1)
         save_checkpoint({

@@ -14,7 +14,7 @@ poolings = ["GAP", "GMP", "KMP", "LPP", "SMP", "MXP", "GTP", "STP", "LAEP"]
 #params = np.arange(0,1.01,0.05)
 
 tasks = []
-task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --lr 0.001 30 0.0001 20"
+task_template = "python main.py --pretrained {} --nclasses {} --pool_name {} --lr 0.0001 30 0.00001 20"
 for pool in poolings:
     #for param in params:
     tasks.append(task_template.format(dataset, nclasses, pool)) 

@@ -56,6 +56,7 @@ class Inception3(nn.Module):
         self.Mixed_7b = InceptionE(1280)
         self.Mixed_7c = InceptionE(2048)
         self.fc_ = nn.Linear(2048, num_classes)
+        self.final_bn = nn.BatchNorm1d(2048)
 
         self.pool_name = pool_name
         self.pool_func = {
@@ -135,9 +136,9 @@ class Inception3(nn.Module):
         # 8 x 8 x 2048
         x = self.pool(x)
         # 1 x 1 x 2048
-        x = F.dropout(x, training=self.training)
-        # 1 x 1 x 2048
         x = x.view(x.size(0), -1)
+        # 1 x 1 x 2048
+        x = self.final_bn(x)
         # 2048
         x = self.fc_(x)
         # 1000 (num_classes)
